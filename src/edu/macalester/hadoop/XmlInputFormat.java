@@ -1,4 +1,4 @@
-package edu.macalester.hadoop; /**
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,6 +14,8 @@ package edu.macalester.hadoop; /**
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package edu.macalester.hadoop;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
