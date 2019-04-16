@@ -5,7 +5,6 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.stream.Stream;
 
 public class InvertedIndexReducer extends Reducer<Text, Text, Text, Text> {
 
