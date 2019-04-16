@@ -3,15 +3,18 @@ package edu.macalester.hadoop;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
-import java.util.regex.Pattern;
+import java.util.StringTokenizer;
 
 
 public class InvertedIndexMapper extends Mapper<LongWritable, Text, Text, Text> {
 
-    private static final Pattern wikiLinksPattern = Pattern.compile("\\[.+?\\]");
+    //private static final transient Logger logger = Logger.getLogger("app");
+    private Text word = new Text();
+
 
     @Override
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -22,23 +25,31 @@ public class InvertedIndexMapper extends Mapper<LongWritable, Text, Text, Text> 
         String[] titleAndText = parseTitleAndText(value);
 
         String pageString = titleAndText[0];
+        String text = titleAndText[1]
+                .replaceAll("[^\\w\\s]|('s|ly|ed|ing|ness|.|,|\\?|'|:|;) ", " ")
+                .toLowerCase();
+
         if(notValidPage(pageString))
             return;
 
         Text page = new Text(pageString.replace(' ', '_'));
+        StringTokenizer tokenizer = new StringTokenizer(text);
 
+        while (tokenizer.hasMoreTokens()) {
+            String wordText = tokenizer.nextToken();
+
+            // Detecting and excluding stop words should be done here
+            //if (stopwords.contains(word)) continue;
+
+            word.set(wordText);
+            context.write(word, page);
+
+        }
 
     }
 
     private boolean notValidPage(String pageString) {
         return pageString.contains(":");
-    }
-
-    private String sweetify(String aLinkText) {
-        if(aLinkText.contains("&amp;"))
-            return aLinkText.replace("&amp;", "&");
-
-        return aLinkText;
     }
 
     private String[] parseTitleAndText(Text value) throws CharacterCodingException {
