@@ -40,6 +40,7 @@ public class XmlInputFormat extends TextInputFormat {
     public static final String START_TAG_KEY = "xmlinput.start";
     public static final String END_TAG_KEY = "xmlinput.end";
 
+
     @Override
     public RecordReader<LongWritable, Text> createRecordReader(InputSplit split, TaskAttemptContext context) {
         try {
