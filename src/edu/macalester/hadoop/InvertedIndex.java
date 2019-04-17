@@ -29,7 +29,7 @@ public class InvertedIndex extends Configured implements Tool {
             return 2;
         }
 
-        Job job = Job.getInstance(getConf());
+        Job job = Job.getInstance(conf, "invertedindex");
 
         job.setJarByClass(InvertedIndex.class);
 
@@ -50,7 +50,7 @@ public class InvertedIndex extends Configured implements Tool {
         FileInputFormat.setInputPaths(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
 
-        FileSystem fs = FileSystem.newInstance(getConf());
+        FileSystem fs = FileSystem.newInstance(conf);
 
         if (fs.exists(outputPath)) {
             fs.delete(outputPath, true);
