@@ -25,15 +25,14 @@ public class InvertedIndexMapper extends Mapper<LongWritable, Text, Text, Text> 
         String[] titleAndText = parseTitleAndText(value);
 
         String pageString = titleAndText[0];
-        String text = titleAndText[1]
-                .replaceAll("[^\\w\\s]|('s|ly|ed|ing|ness|.|,|\\?|'|:|;) ", " ")
-                .toLowerCase();
+        // TODO: parse the text to get actual meaningful words.
+        String text = titleAndText[1].toLowerCase();
 
         if(notValidPage(pageString))
             return;
 
         Text page = new Text(pageString.replace(' ', '_'));
-        StringTokenizer tokenizer = new StringTokenizer(text);
+        StringTokenizer tokenizer = new StringTokenizer(text, " \t\n\r\f\",.:;?![](){}*'");
 
         while (tokenizer.hasMoreTokens()) {
             String wordText = tokenizer.nextToken();
