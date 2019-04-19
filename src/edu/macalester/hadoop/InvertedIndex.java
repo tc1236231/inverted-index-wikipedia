@@ -24,8 +24,8 @@ public class InvertedIndex extends Configured implements Tool {
         conf.set(XmlInputFormat.START_TAG_KEY, "<page>");
         conf.set(XmlInputFormat.END_TAG_KEY, "</page>");
 
-        if (args.length < 2) {
-            System.err.println("Usage: invertedindex <input_folder> <output_folder>");
+        if (args.length < 3) {
+            System.err.println("Arguments: <file_system> <input_folder> <output_folder>");
             return 2;
         }
 
@@ -43,15 +43,14 @@ public class InvertedIndex extends Configured implements Tool {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
-
-        Path inputPath = new Path(args[0]);
-        Path outputPath = new Path(args[1]);
+        Path fsPath = new Path(args[0]);
+        Path inputPath = new Path(fsPath, args[1]);
+        Path outputPath = new Path(fsPath, args[2]);
 
         FileInputFormat.setInputPaths(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
 
-        FileSystem fs = FileSystem.newInstance(conf);
-
+        FileSystem fs = fsPath.getFileSystem(conf);
         if (fs.exists(outputPath)) {
             fs.delete(outputPath, true);
         }
