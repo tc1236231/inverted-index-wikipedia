@@ -10,11 +10,15 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+//import org.apache.log4j.Logger;
 
 public class InvertedIndex extends Configured implements Tool {
 
+//    private static final transient Logger logger = Logger.getLogger(InvertedIndex.class);
+
 
     public static void main(String[] args) throws Exception{
+//        logger.info("Customized logging running");
         System.exit(ToolRunner.run(new Configuration(), new InvertedIndex(), args));
     }
 
