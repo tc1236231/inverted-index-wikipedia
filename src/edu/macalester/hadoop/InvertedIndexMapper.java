@@ -4,7 +4,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.wikiclean.WikiClean;
-//import org.apache.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -12,7 +12,8 @@ import java.util.StringTokenizer;
 
 public class InvertedIndexMapper extends Mapper<LongWritable, Text, Text, Text> {
 
-    //private static final transient Logger logger = Logger.getLogger("app");
+    private static final transient Logger logger = Logger.getLogger(InvertedIndexMapper.class);
+
     private Text word = new Text();
     private WikiClean cleaner = new WikiClean.Builder()
             .withFooter(false)
@@ -20,11 +21,18 @@ public class InvertedIndexMapper extends Mapper<LongWritable, Text, Text, Text> 
             .withTitle(false)
             .build();
 
-
     @Override
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
-        String[] titleAndText = parseTitleAndText(value);
+        String[] titleAndText;
+
+        try {
+            titleAndText = parseTitleAndText(value);
+        } catch (IllegalArgumentException e) {
+            //throw new IOException("Article not parsed.");
+            return;
+        }
+
 
         String pageString = titleAndText[0];
         String text = titleAndText[1].toLowerCase();
@@ -50,8 +58,16 @@ public class InvertedIndexMapper extends Mapper<LongWritable, Text, Text, Text> 
         String[] titleAndText = new String[2];
 
         String valueStr = value.toString();
+
         titleAndText[0] = cleaner.getTitle(valueStr);
-        titleAndText[1] = cleaner.clean(valueStr);
+
+        try {
+            titleAndText[1] = cleaner.clean(valueStr);
+        } catch (IllegalArgumentException e) {
+            logger.info("MY_LOGGING: Caught IllegalArgumentException in parsing text body.");
+            logger.info("MY_LOGGING: Title: " + titleAndText[0]);
+            throw e;
+        }
 
         return titleAndText;
     }
