@@ -1,5 +1,11 @@
 package edu.macalester.hadoop;
 
+import com.google.cloud.hadoop.io.bigquery.BigQueryConfiguration;
+import com.google.cloud.hadoop.io.bigquery.BigQueryFileFormat;
+import com.google.cloud.hadoop.io.bigquery.output.BigQueryOutputConfiguration;
+import com.google.cloud.hadoop.io.bigquery.output.BigQueryTableFieldSchema;
+import com.google.cloud.hadoop.io.bigquery.output.BigQueryTableSchema;
+import com.google.cloud.hadoop.io.bigquery.output.IndirectBigQueryOutputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -8,8 +14,12 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+
+import java.util.ArrayList;
+import java.util.List;
 //import org.apache.log4j.Logger;
 
 public class InvertedIndex extends Configured implements Tool {
@@ -33,6 +43,31 @@ public class InvertedIndex extends Configured implements Tool {
             return 2;
         }
 
+        // Get the individual parameters from the command line.
+        String projectId = "comp-445-mapreduce";
+        String outputQualifiedTableId = "1.1";
+        String outputGcsPath = args[2];
+
+        // Define the schema we will be using for the output BigQuery table.
+        List<BigQueryTableFieldSchema> outputTableFieldSchema = new ArrayList<>();
+        outputTableFieldSchema.add(new BigQueryTableFieldSchema().setName("KeyWord").setType("STRING"));
+        outputTableFieldSchema.add(new BigQueryTableFieldSchema().setName("IndexResult").setType("STRING"));
+        BigQueryTableSchema outputSchema = new BigQueryTableSchema().setFields(outputTableFieldSchema);
+
+        // Set the job-level projectId.
+        conf.set(BigQueryConfiguration.PROJECT_ID_KEY, projectId);
+
+        // Configure input and output.
+//        BigQueryConfiguration.configureBigQueryInput(conf, inputQualifiedTableId);
+        BigQueryOutputConfiguration.configure(
+                conf,
+                outputQualifiedTableId,
+                outputSchema,
+                outputGcsPath,
+                BigQueryFileFormat.NEWLINE_DELIMITED_JSON,
+                TextOutputFormat.class
+        );
+
         Job job = Job.getInstance(conf, "invertedindex");
 
         job.setJarByClass(InvertedIndex.class);
@@ -46,6 +81,7 @@ public class InvertedIndex extends Configured implements Tool {
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
+        job.setOutputFormatClass(IndirectBigQueryOutputFormat.class);
 
         Path fsPath = new Path(args[0]);
         Path inputPath = new Path(fsPath, args[1]);
@@ -59,8 +95,6 @@ public class InvertedIndex extends Configured implements Tool {
             fs.delete(outputPath, true);
         }
 
-        if (job.waitForCompletion(true)) {
-            return 0;
-        } else return 1;
+        return job.waitForCompletion(true) ? 0 : 1;
     }
 }

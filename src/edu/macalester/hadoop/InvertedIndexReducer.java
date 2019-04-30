@@ -1,13 +1,16 @@
 package edu.macalester.hadoop;
 
+import com.google.gson.JsonObject;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-//import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-public class InvertedIndexReducer extends Reducer<Text, Text, Text, Text> {
+//import org.apache.log4j.Logger;
+
+public class InvertedIndexReducer extends Reducer<Text, Text, JsonObject, NullWritable> {
 
     //private static final Logger logger = Logger.getLogger(InvertedIndexReducer.class);
 
@@ -21,6 +24,11 @@ public class InvertedIndexReducer extends Reducer<Text, Text, Text, Text> {
             Integer count = fileFreq.getOrDefault(pageString, 0);
             fileFreq.put(pageString, count + 1);
         }
-        context.write(word, new Text(fileFreq.toString()));
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("KeyWord", word.toString());
+        jsonObject.addProperty("IndexResult", fileFreq.toString());
+        // Key does not matter.
+        context.write(jsonObject, NullWritable.get());
     }
 }
