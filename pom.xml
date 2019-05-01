@@ -46,6 +46,7 @@
 
     <build>
         <finalName>invertedindex</finalName>
+        <sourceDirectory>src/edu/macalester/hadoop</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
