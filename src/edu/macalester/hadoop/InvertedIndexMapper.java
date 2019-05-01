@@ -40,7 +40,10 @@ public class InvertedIndexMapper extends Mapper<LongWritable, Text, Text, Text> 
         if(notValidPage(pageString))
             return;
 
-        Text page = new Text(pageString.replace(' ', '_'));
+        pageString = pageString.trim();
+        pageString = pageString.replace(' ', '_');
+
+        Text page = new Text(pageString);
         StringTokenizer tokenizer = new StringTokenizer(text, " \t\n\r\f\",.:;?!#[](){}*");
 
         while (tokenizer.hasMoreTokens()) {
